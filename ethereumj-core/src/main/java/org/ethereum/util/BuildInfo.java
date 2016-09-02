@@ -25,8 +25,8 @@ public class BuildInfo {
                 buildHash = props.getProperty("build.hash");
                 buildTime = props.getProperty("build.time");
                 buildBranch = props.getProperty("build.branch");
-        } catch (IOException e) {
-            logger.error("Error reading /build-info.properties", e);
+        } catch (Exception e) {
+//            logger.error("Error reading /build-info.properties", e);
         }
     }
 

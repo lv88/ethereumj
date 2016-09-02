@@ -20,6 +20,8 @@ def gitCurBranch() {
 
 subprojects {
     apply plugin: 'java'
+    //add spring-boot
+//    apply plugin: 'spring-boot'
 
     def config = new ConfigSlurper().parse(new File("$projectDir/src/main/resources/version.properties").toURI().toURL())
 

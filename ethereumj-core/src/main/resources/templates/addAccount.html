@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head lang="en">
+    <meta charset="UTF-8" />
+    <script th:src="@{/js/jquery-3.1.0.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"></link>
+    <link rel="stylesheet" th:href="@{/css/bootstrap-theme.min.css}"></link>
+
+    <script th:src="@{/js/simple.js}"></script>
+    <title></title>
+</head>
+<body>
+<h1>add account</h1>
+<div class="container-fluid ">
+    <div class="row col-md-12">
+        <div class="col-md-4">please input youre password:</div>
+        <div class="col-md-8"><input name="password" id="password" type="password"/> </div>
+    </div>
+    <div class="row col-md-12">
+        <div class="col-md-4">please repeat your password:</div>
+        <div class="col-md-8"><input name="repeat" id="repeat" type="password"/> </div>
+    </div>
+    <div class="row col-md-12">
+        <div class="col-md-4"><input type="button" id="addButton" value="Add"/></div>
+    </div>
+
+    <div class="row" style="display: none" id="newAccoutDiv">
+
+    </div>
+    <span id="newAccount"/>
+</div>
+</body>
+</html>

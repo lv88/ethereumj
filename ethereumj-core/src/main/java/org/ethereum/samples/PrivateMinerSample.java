@@ -3,13 +3,17 @@ package org.ethereum.samples;
 import com.typesafe.config.ConfigFactory;
 import org.ethereum.config.SystemProperties;
 import org.ethereum.core.Block;
+import org.ethereum.core.Repository;
 import org.ethereum.core.Transaction;
 import org.ethereum.crypto.ECKey;
 import org.ethereum.facade.EthereumFactory;
+import org.ethereum.jsonrpc.JsonRpc;
+import org.ethereum.jsonrpc.TypeConverter;
 import org.ethereum.mine.Ethash;
 import org.ethereum.mine.MinerListener;
 import org.ethereum.util.ByteUtil;
 import org.spongycastle.util.encoders.Hex;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -180,6 +184,17 @@ public class PrivateMinerSample {
                     }
                 }
             }).start();
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        checkAccount();
+                    } catch (Exception e) {
+                        logger.error("Error generating tx: ", e);
+                    }
+                }
+            }).start();
         }
 
         /**
@@ -202,7 +217,32 @@ public class PrivateMinerSample {
                     logger.info("<== Submitting tx: " + tx);
                     ethereum.submitTransaction(tx);
                 }
-                Thread.sleep(7000);
+                Thread.sleep(70000);
+            }
+        }
+
+        @Autowired
+        JsonRpc jsonRpc;
+        @Autowired
+        Repository repository;
+        private void checkAccount(){
+            while(true) {
+                try {
+                    for (byte[] account : repository.getAccountsKeys()) {
+//                    ethereum.getRepository();
+                        System.out.println(String.format("%s ==%s", ByteUtil.toHexString(account), repository.getAccountState(account).getBalance().toString()));
+                    }
+                    String cowAcct = jsonRpc.personal_newAccount("cow");
+                    byte[] newAddress = TypeConverter.StringHexToByteArray(cowAcct);
+                    if (!repository.isExist(newAddress)) {
+                        repository.createAccount(newAddress);
+                    }
+                    String bal0 = jsonRpc.eth_getBalance(cowAcct);
+                    System.out.println(String.format("createAccount():%s ====Balance: %s", cowAcct, bal0));
+                    Thread.sleep(70000);
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
             }
         }
     }
@@ -211,6 +251,10 @@ public class PrivateMinerSample {
      *  Creating two EthereumJ instances with different config classes
      */
     public static void main(String[] args) throws Exception {
+        PrivateMinerSample.start();
+    }
+
+    public static void start(){
         BasicSample.sLogger.info("Starting EthtereumJ miner instance!");
         EthereumFactory.createEthereum(MinerConfig.class);
 

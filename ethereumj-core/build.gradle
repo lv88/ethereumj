@@ -8,6 +8,8 @@ buildscript {
     dependencies {
         classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:3.0.1'
+        //add spring-boot
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.0.RELEASE")
     }
 }
 
@@ -21,10 +23,12 @@ plugins {
 
 apply plugin: 'propdeps-maven'
 apply plugin: 'com.jfrog.artifactory-upload'
+apply plugin: 'spring-boot'
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 
-mainClassName = 'org.ethereum.Start'
+//mainClassName = 'org.ethereum.Start'
+mainClassName = 'com.akcome.ethereum.starter.Application'
 applicationDefaultJvmArgs = ["-server", "-Xss32m", "-XX:-OmitStackTraceInFastThrow"]
 
 if ( project.hasProperty('jvmArgs') ) {
@@ -131,6 +135,18 @@ dependencies {
     compile "org.springframework:spring-orm:${springVersion}"
     compile "com.typesafe:config:1.2.1"
 
+    compile ("org.springframework.boot:spring-boot-starter-web:1.4.0.RELEASE"){
+        exclude module : 'spring-boot-starter-logging'
+//        exclude group: "log4j"
+//        exclude group: "org.slf4j", module: "log4j-over-slf4j"
+//        exclude group: "org.slf4j", module: "slf4j-log4j12"
+
+    }
+    compile ("org.springframework.boot:spring-boot-starter-thymeleaf") {
+        exclude module: 'spring-boot-starter-logging'
+    }
+    compile "com.google.guava:guava:18.0"
+
     compile "org.mapdb:mapdb:2.0-beta12"
 
     compile "org.slf4j:slf4j-log4j12:${slf4jVersion}"
@@ -140,7 +156,7 @@ dependencies {
         exclude group: 'junit', module: 'junit'
     }
     optional "commons-logging:commons-logging:1.0"
-    optional "org.slf4j:jcl-over-slf4j:${slf4jVersion}"
+//    optional "org.slf4j:jcl-over-slf4j:${slf4jVersion}"
     testCompile "junit:junit:${junitVersion}"
     testCompile "org.springframework:spring-test:${springVersion}"
 }
@@ -152,7 +168,7 @@ javadoc {
     options.addStringOption('-quiet')
     options.encoding = "UTF-8"
     options.links(
-            "http://docs.oracle.com/javase/7/docs/api/",
+            "http://docs.oracle.com/javase/8/docs/api/",
             "http://netty.io/4.0/api/"
     )
 }
