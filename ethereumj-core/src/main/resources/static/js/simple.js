@@ -27,7 +27,7 @@ function addAccount() {
             url:"/addAccount/"+password,
             dataType: "text",
             success:function(data){
-                $("#newAccoutDiv").innerText=data;
+                $("#addAccountResult").text(data);
                 $("#newAccoutDiv").css("display","block");
             },
             error: function () {
@@ -60,7 +60,7 @@ function doTransfer() {
             type:"POST",
             url:"/doTransaction/"+fromAccount+"/"+toAccount+"/"+amount+"/"+password,
             success:function(data){
-                $("#transferResultDiv").innerText=data;
+                $("#transferResult").text(data);
                 $("#transferResultDiv").css("display","block");
             },
             error: function () {

@@ -103,7 +103,10 @@ public class EthereumBean {
     public String doTransaction(String from, String to,String number,String seed){
         try {
             ECKey senderKey = ECKey.fromPrivate(sha3(seed.getBytes()));
-            if (StringUtils.equals(from, TypeConverter.toJsonHex(senderKey.getAddress()))) {
+            if (!from.startsWith("0x")) {
+                from="0x"+from;
+            }
+            if (!StringUtils.equals(from, TypeConverter.toJsonHex(senderKey.getAddress()))) {
                 return "转账账户密码不正确";
             }
 //        ECKey senderKey = ECKey.fromPrivate(Hex.decode("6ef8da380c27cea8fdf7448340ea99e8e2268fc2950d79ed47cbf6f85dc977ec"));

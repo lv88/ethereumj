@@ -45,7 +45,7 @@ Run `../gradlew build`.
 #### Run an ethereum node
 
  - run `../gradlew run`, or
- - build a standalone executable jar with `../gradlew shadow` and execute the `-all` jar in `build/libs` using `java -jar [jarfile]`.
+ - build a standalone executable jar with `../gradlew shadow` and execute the `-all` jar in `build/libs` using `java -Xmn128m -Xms128m -Xmx2048m -jar [jarfile]`.
 
 #### Import sources into IntelliJ IDEA
 
