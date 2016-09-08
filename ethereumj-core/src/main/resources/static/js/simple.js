@@ -51,17 +51,18 @@ function doTransfer() {
     } else if(toAccount==""){
         alert("请输入对方的帐号");
         return;
-    } else if(amount==""){
-        alert("请输入转账金额");
+    } else if(isNaN(amount)){
+        alert("请输入正确的转账金额，只允许正整数");
         return;
     }
     $.ajax(
         {
             type:"POST",
-            url:"/doTransaction/"+fromAccount+"/"+toAccount+"/"+amount+"/"+password,
+            url:"/doTransaction/"+fromAccount+"/"+toAccount+"/"+parseInt(amount)+"/"+password,
             success:function(data){
                 $("#transferResult").text(data);
                 $("#transferResultDiv").css("display","block");
+                alert(data);
             },
             error: function () {
                 alert("转账失败");

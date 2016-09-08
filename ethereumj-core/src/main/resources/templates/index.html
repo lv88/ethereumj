@@ -9,16 +9,29 @@
     <link rel="stylesheet" th:href="@{/css/bootstrap-theme.min.css}"></link>
 
     <script th:src="@{/js/simple.js}"></script>
-    <title></title>
+    <title>账户列表</title>
 </head>
 <body>
-<h1>account list</h1>
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">以太坊私有链</a>
+        </div>
+        <div>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/list">账户列表</a></li>
+                <li><a href="/addAccount">创建账户</a></li>
+                <li><a href="/transfer">转账</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
 <div class="container-fluid" th:unless="${#lists.isEmpty(accountList)}">
     <table>
         <thead>
         <tr>
-            <th>Address</th>
-            <th>Balance</th>
+            <th>账户</th>
+            <th>余额</th>
         </tr>
         </thead>
         <tbody>
@@ -29,8 +42,8 @@
         </tbody>
     </table>
 </div>
-<a href="/addAccount">创建账户</a>
+
 <br/>
-<a href="/transfer">转账</a>
+
 </body>
 </html>

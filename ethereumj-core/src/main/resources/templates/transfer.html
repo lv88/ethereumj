@@ -9,10 +9,23 @@
     <link rel="stylesheet" th:href="@{/css/bootstrap-theme.min.css}"></link>
 
     <script th:src="@{/js/simple.js}"></script>
-    <title></title>
+    <title>转账</title>
 </head>
 <body>
-<h1>add account</h1>
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">以太坊私有链</a>
+        </div>
+        <div>
+            <ul class="nav navbar-nav">
+                <li><a href="/list">账户列表</a></li>
+                <li><a href="/addAccount">创建账户</a></li>
+                <li class="active"><a href="/transfer">转账</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
 <div class="container-fluid">
     <div class="row col-md-8">
         <div class="col-md-4">请输入你的帐号:</div>
@@ -27,15 +40,21 @@
         <div class="col-md-4"><input name="toAccount" id="toAccount" type="text" size="60"/> </div>
     </div>
     <div class="row col-md-8">
-        <div class="col-md-4">请输入转账金额:</div>
+        <div class="col-md-4">请输入转账金额(限输入整数):</div>
         <div class="col-md-4"><input name="amount" id="amount" type="number"/> </div>
     </div>
     <div class="row col-md-8">
         <div class="col-md-4"><input type="button" id="transferButton" value="转账"/></div>
     </div>
-
     <div  class="row col-md-8" style="display: none" id="transferResultDiv">
         <div class="col-md-4"><span id="transferResult"></span></div>
+    </div>
+
+    <div class="row col-md-8" >
+        <p>注：<br/>
+            转账试用账号：0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826 <br/>
+            转账试用账号密码：cow
+        </p>
     </div>
 </div>
 </body>

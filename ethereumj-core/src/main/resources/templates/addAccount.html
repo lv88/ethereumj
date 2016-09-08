@@ -9,27 +9,39 @@
     <link rel="stylesheet" th:href="@{/css/bootstrap-theme.min.css}"></link>
 
     <script th:src="@{/js/simple.js}"></script>
-    <title></title>
+    <title>创建账户</title>
 </head>
 <body>
-<h1>add account</h1>
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">以太坊私有链</a>
+        </div>
+        <div>
+            <ul class="nav navbar-nav">
+                <li><a href="/list">账户列表</a></li>
+                <li class="active"><a href="/addAccount">创建账户</a></li>
+                <li><a href="/transfer">转账</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
 <div class="container-fluid ">
     <div class="row col-md-12">
-        <div class="col-md-4">please input youre password:</div>
-        <div class="col-md-8"><input name="password" id="password" type="password"/> </div>
+        <div class="col-md-2">请输入你的密码</div>
+        <div class="col-md-10"><input name="password" id="password" type="password"/> </div>
     </div>
     <div class="row col-md-12">
-        <div class="col-md-4">please repeat your password:</div>
-        <div class="col-md-8"><input name="repeat" id="repeat" type="password"/> </div>
+        <div class="col-md-2">请重复输入你的密码</div>
+        <div class="col-md-10"><input name="repeat" id="repeat" type="password"/> </div>
     </div>
     <div class="row col-md-12">
-        <div class="col-md-4"><input type="button" id="addButton" value="Add"/></div>
+        <div class="col-md-4"><input type="button" id="addButton" value="创建账户"/></div>
     </div>
 
     <div class="row col-md-12" style="display: none" id="newAccoutDiv">
         <div class="col-md-4"><span id="addAccountResult"/></div>
     </div>
-
 </div>
 </body>
 </html>
