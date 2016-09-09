@@ -78,13 +78,15 @@ public class EthereumBean {
 
     public String addAccount(String account){
         try {
-            String cowAcct = jsonRpc.personal_newAccount(account);
-            byte[] newAddress = TypeConverter.StringHexToByteArray(cowAcct);
+            byte[] newAddress = ECKey.fromPrivate(sha3(account.getBytes())).getAddress();
+//            String cowAcct = jsonRpc.personal_newAccount(account);
+//            byte[] newAddress = TypeConverter.StringHexToByteArray(cowAcct);
             if (!repository.isExist(newAddress)) {
-                AccountState accountState = repository.createAccount(newAddress);
+//                AccountState accountState = repository.createAccount(newAddress);
+                jsonRpc.personal_newAccount(account);
                 return String.format("创建账户成功，新账户地址是：%s",TypeConverter.toJsonHex(newAddress));
             }
-            return "账户已存在";
+            return String.format("账户已存在，账户地址是：%s",TypeConverter.toJsonHex(newAddress));
         } catch (Exception e){
             return "创建账户失败";
         }
@@ -106,11 +108,11 @@ public class EthereumBean {
             if (!from.startsWith("0x")) {
                 from="0x"+from;
             }
-            if (!StringUtils.equals(from, TypeConverter.toJsonHex(senderKey.getAddress()))) {
+            if (!StringUtils.equals(from.trim(), TypeConverter.toJsonHex(senderKey.getAddress()))) {
                 return "转账账户密码不正确";
             }
 //        ECKey senderKey = ECKey.fromPrivate(Hex.decode("6ef8da380c27cea8fdf7448340ea99e8e2268fc2950d79ed47cbf6f85dc977ec"));
-            byte[] receiverAddr = TypeConverter.StringHexToByteArray(to);//"5db10750e8caff27f906b41c71b3471057dd2004"
+            byte[] receiverAddr = TypeConverter.StringHexToByteArray(to.trim());//"5db10750e8caff27f906b41c71b3471057dd2004"
             StringBuilder msg = new StringBuilder();
             msg.append("before transaction").append("\n");
             msg.append(listAccount());
