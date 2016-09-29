@@ -1,5 +1,6 @@
 package org.ethereum.facade;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.ethereum.config.CommonConfig;
 import org.ethereum.config.SystemProperties;
 import org.ethereum.core.*;
@@ -15,7 +16,6 @@ import org.ethereum.manager.BlockLoader;
 import org.ethereum.manager.WorldManager;
 import org.ethereum.mine.BlockMiner;
 import org.ethereum.net.client.PeerClient;
-import org.ethereum.net.peerdiscovery.PeerInfo;
 import org.ethereum.net.rlpx.Node;
 import org.ethereum.net.server.ChannelManager;
 import org.ethereum.net.shh.Whisper;
@@ -36,9 +36,7 @@ import org.springframework.util.concurrent.FutureAdapter;
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
 import java.net.InetAddress;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -99,64 +97,6 @@ public class EthereumImpl implements Ethereum {
         gLogger.info("EthereumJ node started: enode://" + Hex.toHexString(config.nodeId()) + "@" + config.externalIp() + ":" + config.listenPort());
     }
 
-    /**
-     * Find a peer but not this one
-     *
-     * @param peer - peer to exclude
-     * @return online peer
-     */
-    @Override
-    public PeerInfo findOnlinePeer(PeerInfo peer) {
-        Set<PeerInfo> excludePeers = new HashSet<>();
-        excludePeers.add(peer);
-        return findOnlinePeer(excludePeers);
-    }
-
-    @Override
-    public PeerInfo findOnlinePeer() {
-        Set<PeerInfo> excludePeers = new HashSet<>();
-        return findOnlinePeer(excludePeers);
-    }
-
-    @Override
-    public PeerInfo findOnlinePeer(Set<PeerInfo> excludePeers) {
-        logger.info("Looking for online peers...");
-
-        final EthereumListener listener = worldManager.getListener();
-        listener.trace("Looking for online peer");
-
-        worldManager.startPeerDiscovery();
-
-        final Set<PeerInfo> peers = worldManager.getPeerDiscovery().getPeers();
-        for (PeerInfo peer : peers) { // it blocks until a peer is available.
-            if (peer.isOnline() && !excludePeers.contains(peer)) {
-                logger.info("Found peer: {}", peer.toString());
-                listener.trace(String.format("Found online peer: [ %s ]", peer.toString()));
-                return peer;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public PeerInfo waitForOnlinePeer() {
-        PeerInfo peer = null;
-        while (peer == null) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            peer = this.findOnlinePeer();
-        }
-        return peer;
-    }
-
-    @Override
-    public Set<PeerInfo> getPeers() {
-        return worldManager.getPeerDiscovery().getPeers();
-    }
-
     @Override
     public void startPeerDiscovery() {
         worldManager.startPeerDiscovery();
@@ -186,7 +126,7 @@ public class EthereumImpl implements Ethereum {
 
     @Override
     public org.ethereum.facade.Blockchain getBlockchain() {
-        return (org.ethereum.facade.Blockchain)worldManager.getBlockchain();
+        return (org.ethereum.facade.Blockchain) worldManager.getBlockchain();
     }
 
     public ImportResult addNewMinedBlock(Block block) {
@@ -211,7 +151,7 @@ public class EthereumImpl implements Ethereum {
     public void close() {
         logger.info("Shutting down Ethereum instance...");
         worldManager.close();
-        ((AbstractApplicationContext)getApplicationContext()).close();
+        ((AbstractApplicationContext) getApplicationContext()).close();
     }
 
     @Override
@@ -274,6 +214,39 @@ public class EthereumImpl implements Ethereum {
         return callConstantImpl(tx, block).getReceipt();
     }
 
+    public BlockSummary replayBlock(Block block) {
+        List<TransactionReceipt> receipts = new ArrayList<>();
+        List<TransactionExecutionSummary> summaries = new ArrayList<>();
+
+        Repository repository = ((Repository) worldManager.getRepository())
+                .getSnapshotTo(block.getStateRoot())
+                .startTracking();
+
+        try {
+            for (Transaction tx : block.getTransactionsList()) {
+                org.ethereum.core.TransactionExecutor executor = commonConfig.transactionExecutor(
+                        tx, block.getCoinbase(), repository, worldManager.getBlockStore(),
+                        programInvokeFactory, block, worldManager.getListener(), 0);
+
+                executor.setLocalCall(true);
+                executor.init();
+                executor.execute();
+                executor.go();
+
+                TransactionExecutionSummary summary = executor.finalization();
+                TransactionReceipt receipt = executor.getReceipt();
+                // TODO: change to repository.getRoot() after RepositoryTrack implementation
+                receipt.setPostTxState(ArrayUtils.EMPTY_BYTE_ARRAY);
+                receipts.add(receipt);
+                summaries.add(summary);
+            }
+        } finally {
+            repository.rollback();
+        }
+
+        return new BlockSummary(block, new HashMap<byte[], BigInteger>(), receipts, summaries);
+    }
+
     private org.ethereum.core.TransactionExecutor callConstantImpl(Transaction tx, Block block) {
 
         Repository repository = ((Repository) worldManager.getRepository())
@@ -325,7 +298,7 @@ public class EthereumImpl implements Ethereum {
     }
 
     @Override
-    public org.ethereum.facade.Repository getSnapshotTo(byte[] root){
+    public org.ethereum.facade.Repository getSnapshotTo(byte[] root) {
 
         Repository repository = (Repository) worldManager.getRepository();
         org.ethereum.facade.Repository snapshot = (org.ethereum.facade.Repository) repository.getSnapshotTo(root);
@@ -355,8 +328,8 @@ public class EthereumImpl implements Ethereum {
     }
 
     @Override
-    public BlockLoader getBlockLoader(){
-        return  blockLoader;
+    public BlockLoader getBlockLoader() {
+        return blockLoader;
     }
 
     @Override

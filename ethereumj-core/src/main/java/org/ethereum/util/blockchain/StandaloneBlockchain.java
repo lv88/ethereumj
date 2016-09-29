@@ -349,11 +349,22 @@ public class StandaloneBlockchain implements LocalBlockchain {
         }
     }
 
+    public HashMapDB getStateDS() {
+        return stateDS;
+    }
+
+    public HashMapDB getDetailsDS() {
+        return detailsDS;
+    }
+
     private BlockchainImpl createBlockchain(Genesis genesis) {
         IndexedBlockStore blockStore = new IndexedBlockStore();
         blockStore.init(new HashMapDB(), new HashMapDB());
 
-        Repository repository = new RepositoryImpl(new HashMapDB(), new HashMapDB());
+        detailsDS = new HashMapDB();
+        stateDS = new HashMapDB();
+        RepositoryImpl repository = new RepositoryImpl(detailsDS, stateDS, true)
+                .withBlockStore(blockStore);
 
         ProgramInvokeFactoryImpl programInvokeFactory = new ProgramInvokeFactoryImpl();
         listener = new CompositeEthereumListener();
@@ -384,6 +395,7 @@ public class StandaloneBlockchain implements LocalBlockchain {
         }
 
         track.commit();
+        repository.commitBlock(genesis.getHeader());
 
         blockStore.saveBlock(genesis, genesis.getCumulativeDifficulty(), true);
 
@@ -446,8 +458,10 @@ public class StandaloneBlockchain implements LocalBlockchain {
         @Override
         public Object[] callConstFunction(Block callBlock, String functionName, Object... args) {
 
+            CallTransaction.Function func = contract.getByName(functionName);
+            if (func == null) throw new RuntimeException("No function with name '" + functionName + "'");
             Transaction tx = CallTransaction.createCallTransaction(0, 0, 100000000000000L,
-                    Hex.toHexString(getAddress()), 0, contract.getByName(functionName), args);
+                    Hex.toHexString(getAddress()), 0, func, args);
             tx.sign(new byte[32]);
 
             Repository repository = getBlockchain().getRepository().getSnapshotTo(callBlock.getStateRoot()).startTracking();
@@ -463,7 +477,7 @@ public class StandaloneBlockchain implements LocalBlockchain {
                 executor.go();
                 executor.finalization();
 
-                return contract.getByName(functionName).decodeResult(executor.getResult().getHReturn());
+                return func.decodeResult(executor.getResult().getHReturn());
             } finally {
                 repository.rollback();
             }
